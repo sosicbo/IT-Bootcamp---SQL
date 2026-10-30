@@ -1,5 +1,5 @@
 # Bojana Sosic
 
-## Kratak opis projekta
+## Projekat se bavi pregledom fudbalske sezone 2024/25
 
-## Pretpostavke o podacima
+## Podaci se dobijaju koriscenjenjem SQL koncepata
