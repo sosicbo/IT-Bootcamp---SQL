@@ -9,19 +9,20 @@
 - **Udeo porazi:** 34
 
 ## 2. Sezona po mesecima
-Najvise golova je dato u decembru, 145 golova
+Najvise golova je dato u avgustu, cak 99 golova, u proseku 3.54 po utakmici od ukupno 28 odigrane utakmice.
 
 ## 3. Publika
 
 Zabeležena je ogromna posećenost, što govori o podršci navijača.
 
-- **Prosečna poseta:** 24.199 gledalaca
-- **Popunjenost stadiona:** 85,7%
+- **Prosečna poseta:** 21.746 gledalaca
+- **Popunjenost stadiona:** 90,6%
 - **Utakmice bez podatka o poseti:** 9
+- **Utakmice bez publike:** 0
 
 ## 4. Sudije
 
-Najvise kartona po utamici imao je sudija **Henrik Dahl** sa prosekom od cak 4.13 kartona po utakmici.
+Najvise kartona po utamici imao je sudija **Peter Lindgren** sa prosekom od cak 4.25 kartona po utakmici.
 
 ## 5. Strelci
 
@@ -35,9 +36,13 @@ Najveća uzdanica bio je **Mattéo	O'Brien**, ali su i ostali bili na visini zad
 
 A najboli asistenti su bili:
 
-- **Filip	Petrović:** 7
-- **Takumi	Yamamoto:** 5
-- **Vinícius	Santos:** 5  
-- **Raphaël	Moreau:** 4 golova 
-- **Aaron	Shaw:** 3 golova 
+- **Pablo	Fernández:** 9
+- **Filip	Petrović:**	7
+- **Eirik	Solberg:**	7
+- **Lucas	Pereira:**	7
+- **Mikkel	Nielsen:**	6
+
+## 6. Kvalitet podataka
+
+U sezoni postoji jedna utakmica bez podatka o posecenosti i jedna utakmica na kojoj se konacni rezulatat ne poklapa sa brojem dogadjaja u vezi sa golovima.
 

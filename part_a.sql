@@ -81,9 +81,9 @@ LIMIT 1; --Peter Lindgren	9
 --пенал, дат или промашен?
 SELECT 
 r.referee_id, r.referee_name
-, COUNT(m.match_id) as br_mec
-, SUM(CASE WHEN e.event_id IS NOT NULL THEN 1 ELSE 0 END) as br_penala
-, ROUND(100*SUM(CASE WHEN e.event_id IS NOT NULL THEN 1 ELSE 0 END)/COUNT(*),2)  as prct
+, COUNT(DISTINCT m.match_id) as br_mec
+, COUNT(DISTINCT CASE WHEN e.event_id IS NOT NULL THEN m.match_id END) as br_mec_sa_penalom
+, ROUND(100*COUNT(DISTINCT CASE WHEN e.event_id IS NOT NULL THEN m.match_id END)/COUNT(DISTINCT m.match_id),2)  as prct
 FROM matches m
 LEFT JOIN match_events e ON e.match_id=m.match_id AND e.event_type IN ('penalty_miss','penalty_goal')
 JOIN referees r ON m.referee_id=r.referee_id
@@ -91,7 +91,8 @@ WHERE m.status='played' AND m.season='2024/25'
 GROUP BY r.referee_id, r.referee_name
 ORDER BY prct DESC
 LIMIT 1;
---Peter Lindgren 	56 posto
+--Peter Lindgren 	45 posto
+--Dodat uslov za DISTINCT kao resenje sa sto manje izmena-jer se u slucaju veceg broja penala uzima se samo jedan mec u prebrojavanje
 
 --10. Који тренер је освојио највише бодова у утакмицама у којима је његов тим губио на
 --полувремену? Рачунајте и домаће и гостујуће утакмице.

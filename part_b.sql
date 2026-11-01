@@ -20,60 +20,36 @@ HAVING season='2024/25';
 
 
 --2. По месецима: број утакмица и голова по месецима, и просечан број голова по утакмици у сваком месецу. Који месец се издваја?
-
-WITH timovi AS (
-  SELECT season, home_team_id AS team_id, 'home' AS venue, home_goals AS dati, away_goals AS primljeni, kickoff_ts, match_id
-  FROM matches WHERE status = 'played' AND season='2024/25'
-  UNION ALL
-  SELECT season, away_team_id, 'away', away_goals, home_goals, kickoff_ts, match_id
-  FROM matches WHERE status = 'played' AND season='2024/25')
-
-SELECT 
-MONTH(t.kickoff_ts) as mesec
-, COUNT(distinct match_id) AS utakmice
-,SUM(dati) AS golovi
-FROM timovi t
-GROUP BY MONTH(t.kickoff_ts)
---ORDER BY mesec desc;
-ORDER BY golovi desc;-- u decembru najvise --145
-
-/*mesec	utakmice	golovi
-12	52	145
-1	51	137
-4	40	124
-2	40	119
-3	40	113
-10	30	102
-8	28	99
-11	37	96
-5	30	79
-9	32	78*/
-
-WITH timovi AS (
-  SELECT season, home_team_id AS team_id, 'home' AS venue, home_goals AS dati, away_goals AS primljeni, kickoff_ts, match_id
-  FROM matches WHERE status = 'played' AND season='2024/25'
-  UNION ALL
-  SELECT season, away_team_id, 'away', away_goals, home_goals, kickoff_ts, match_id
-  FROM matches WHERE status = 'played' AND season='2024/25')
-
 SELECT
-MONTH(t.kickoff_ts) as mesec
-, ROUND(AVG(dati),2) as prosek
-FROM timovi t
-GROUP BY MONTH(t.kickoff_ts)
-ORDER BY prosek desc; --8	1.77 u avgustu najvise
+MONTH(kickoff_ts) as mesec
+,COUNT(*) as br_mec
+,SUM(home_goals+away_goals) AS golovi
+, ROUND(AVG(home_goals+away_goals),2) AS prosek_utakmica
+FROM matches
+WHERE season='2024/25' AND status='played'
+GROUP BY MONTH(kickoff_ts)
+ORDER BY prosek_utakmica DESC;--avgust najvise: 8	28	99	3.54
 
 --3. Публика: просечна посета и попуњеност по стадиону; утакмице без податка о посети и утакмица без публике.
 
-SELECT ROUND(AVG(m.attendance)) AS prosek,
-       ROUND(AVG(100 * m.attendance / s.capacity), 1) AS popunjenost_pct,
-       COUNT(*) - COUNT(m.attendance) AS bez_podatka
+SELECT 
+s.stadium_id, s.stadium_name,
+COUNT(*) as br_mec
+,ROUND(AVG(m.attendance)) AS prosek,
+ROUND(AVG(100 * m.attendance / s.capacity), 1) AS popunjenost_pct
+FROM matches m
+JOIN stadiums s ON m.stadium_id   = s.stadium_id
+WHERE m.season = '2024/25' AND m.status = 'played'
+GROUP BY s.stadium_id, s.stadium_name
+ORDER BY popunjenost_pct DESC;
+--Elmsworth Lane	19	21746	90.6
+
+SELECT COUNT(*) - COUNT(m.attendance) AS bez_podatka
+, COUNT_IF(m.attendance=0) AS bez_publike
 FROM matches m
 JOIN stadiums s ON m.stadium_id   = s.stadium_id
 WHERE m.season = '2024/25' AND m.status = 'played';
-
---prosek	popunjenost_pct	bez_podatka
---24199	85.7	9
+--9	0
 
 --4. Судије: за сваког судију број утакмица и картони по утакмици.
 WITH kartoni AS(
@@ -81,7 +57,7 @@ SELECT m.match_id, m.referee_id,
 COUNT(e.event_id) AS kartoni
 FROM matches m
 LEFT JOIN match_events e ON e.match_id = m.match_id  AND e.event_type IN ('yellow_card', 'second_yellow', 'red_card')
-WHERE m.status='played'
+WHERE m.status='played' AND m.season='2024/25'
 GROUP BY m.match_id, m.referee_id
 )
 SELECT r.referee_id, r.referee_name 
@@ -92,7 +68,7 @@ FROM kartoni k
 JOIN referees r On k.referee_id=r.referee_id
 GROUP BY r.referee_id, r.referee_name 
 ORDER BY sum_kartoni DESC;
---Henrik Dahl	40	165	4.13
+--Peter Lindgren	20	85	4.25
 
 --5. Играчи: пет најбољих стрелаца и пет најбољих асистената.
 SELECT p.first_name, p.last_name, COUNT(*) AS golovi
@@ -117,21 +93,51 @@ SELECT p.first_name, p.last_name, COUNT(*) AS golovi
 FROM match_events e
 JOIN matches m ON e.match_id  = m.match_id
 JOIN players p ON e.related_player_id = p.player_id
-JOIN teams   t ON e.team_id   = t.team_id
-WHERE m.season = '2024/25' AND e.event_type IN ('goal', 'penalty_goal') AND t.team_name = 'Kingsbridge City'
+WHERE m.season = '2024/25' AND e.event_type IN ('goal', 'penalty_goal') 
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY golovi DESC
 LIMIT 5;
 
 /*first_name	last_name	golovi
+Pablo	Fernández	9
 Filip	Petrović	7
-Takumi	Yamamoto	5
-Vinícius	Santos	5
-Raphaël	Moreau	4
-Aaron	Shaw	3
+Eirik	Solberg	7
+Lucas	Pereira	7
+Mikkel	Nielsen	6
 */
 
+--6
+--1.provera:dogadjaji sa nepostojecim igracem
+SELECT e.event_id, e.match_id, e.player_id, e.event_type
+FROM match_events e
+LEFT JOIN players p ON p.player_id=e.player_id
+WHERE e.player_id IS NOT NULL AND p.player_id IS NULL;
+--event_id	match_id	player_id	event_type
+--1024	1071	99999	yellow_card
+--1634	1111	99999	yellow_card
 
+SELECT e.event_id, e.match_id, e.player_id, e.event_type
+FROM match_events e
+LEFT JOIN players p ON p.player_id=e.player_id
+JOIN matches m ON e.match_id  = m.match_id
+WHERE e.player_id IS NOT NULL AND p.player_id IS NULL AND m.season = '2024/25';
+--ali nije relevantno za sezonu 2024/25
+
+--2.rezultat se ne slaze sa dogadjajima
+SELECT m.match_id, m.home_goals+ m.away_goals as br_golova_mec
+, COUNT(e.event_id) as br_golova_dogadja
+FROM matches m
+LEFT JOIN match_events e ON e.match_id=m.match_id AND e.event_type IN ('goal', 'penalty_goal', 'own_goal')
+WHERE m.season='2024/25' AND m.status='played'
+GROUP BY m.match_id, m.home_goals, m.away_goals
+HAVING m.home_goals+ m.away_goals <> COUNT(e.event_id);
+--2227	4	3 
+
+--3.postoje 9 utakmica bez podataka o posecenosti
+SELECT COUNT(*) - COUNT(m.attendance) AS bez_podatka
+FROM matches m
+JOIN stadiums s ON m.stadium_id   = s.stadium_id
+WHERE m.season = '2024/25' AND m.status = 'played';
 
 
 
