@@ -44,5 +44,5 @@ A najboli asistenti su bili:
 
 ## 6. Kvalitet podataka
 
-U sezoni postoji jedna utakmica bez podatka o posecenosti i jedna utakmica na kojoj se konacni rezulatat ne poklapa sa brojem dogadjaja u vezi sa golovima.
+U sezoni postoji 9 utakmica bez podatka o posecenosti i jedna utakmica na kojoj se konacni rezulatat ne poklapa sa brojem dogadjaja u vezi sa golovima.
 
